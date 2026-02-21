@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extreme Humanoid | Whole-Body Control Demo</title>
+  <meta name="description" content="Release page for humanoid whole-body control paper demo.">
+  <meta property="og:title" content="Extreme Humanoid | Whole-Body Control Demo">
+  <meta property="og:description" content="Robust and agile whole-body control for humanoid systems.">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap");
+
+    :root {
+      --bg: #f6efe0;
+      --bg-soft: #efe4cf;
+      --text: #2e2617;
+      --text-soft: #6f614b;
+      --line: rgba(122, 101, 68, 0.24);
+      --card: rgba(255, 250, 242, 0.9);
+      --cyan: #8ed7c7;
+      --lime: #88a95a;
+      --amber: #c58c3a;
+      --radius: 16px;
+      --shadow: 0 14px 36px rgba(88, 69, 39, 0.14);
+      --maxw: 1100px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: "Noto Sans SC", "Segoe UI", sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -20% auto auto -10%;
+      width: 60vw;
+      height: 60vw;
+      border-radius: 50%;
+      filter: blur(48px);
+      pointer-events: none;
+      z-index: -2;
+      opacity: 0.2;
+      animation: drift 15s ease-in-out infinite;
+    }
+
+    body::before {
+      background: radial-gradient(circle at 30% 30%, var(--cyan), transparent 65%);
+    }
+
+    body::after {
+      inset: auto -10% -25% auto;
+      background: radial-gradient(circle at 70% 70%, var(--lime), transparent 65%);
+      animation-delay: -7s;
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(84, 64, 38, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(84, 64, 38, 0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at 50% 35%, black 15%, transparent 75%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(4vw, -3vw, 0) scale(1.08); }
+    }
+
+    .container {
+      width: min(var(--maxw), calc(100% - 2.2rem));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(10px);
+      background: rgba(246, 239, 224, 0.78);
+      border-bottom: 1px solid rgba(138, 113, 78, 0.2);
+    }
+
+    .nav {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      font: 700 1.02rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    section {
+      padding: 68px 0;
+    }
+
+    .hero {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .hero-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+      align-items: stretch;
+      width: min(1600px, calc(100% - 1.4rem));
+      margin: 0 auto;
+    }
+
+    .hero-main {
+      background: #3a2b1d;
+      border: none;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 22px 58px rgba(70, 49, 25, 0.24);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+
+    .hero-bg-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      opacity: 0.84;
+      pointer-events: none;
+    }
+
+    .hero-video-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(172deg, rgba(35, 25, 13, 0.34), rgba(35, 25, 13, 0.62));
+      pointer-events: none;
+    }
+
+    .hero-video-glow {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255, 205, 142, 0.14), transparent 44%),
+        radial-gradient(circle at 82% 80%, rgba(194, 166, 110, 0.1), transparent 42%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 4;
+      width: min(920px, 100%);
+      margin: 0 auto;
+    }
+
+    .hero-main.cinematic .hero-bg-video {
+      opacity: 0.9;
+      filter: none;
+      transform: scale(1.02);
+      transition: transform 1.1s ease, opacity 0.08s linear;
+    }
+
+    .hero-main.cinematic .hero-video-glow {
+      opacity: 0.35;
+      transition: opacity 0.08s linear;
+    }
+
+    .hero-main.cinematic .hero-reveal-mask {
+      display: none;
+    }
+
+    .hero-main.cinematic .hero-cutline {
+      display: none;
+    }
+
+    .hero-main.cinematic .pill,
+    .hero-main.cinematic .hero-lead,
+    .hero-main.cinematic .hero-extra {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .hero-main.cinematic .hero-title {
+      font-size: clamp(2.1rem, 6.3vw, 4.6rem);
+      line-height: 0.98;
+      letter-spacing: 0.01em;
+      margin-bottom: 0.7rem;
+      text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      filter: blur(1.6px);
+      transform: translateY(10px) scale(1.03);
+    }
+
+    .hero-main.cinematic .hero-title .hero-name {
+      display: block;
+    }
+
+    .hero-main.cinematic .hero-title .hero-subtitle {
+      display: block;
+      font-size: 0.5em;
+      line-height: 1.06;
+      margin-top: 0.22em;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-main.cinematic.is-revealed .hero-bg-video {
+      opacity: 0;
+      transform: scale(1);
+    }
+
+    .hero-main.cinematic.is-revealed .hero-video-glow {
+      opacity: 0;
+    }
+
+    .hero-main.cinematic.is-revealed .hero-title {
+      animation: heroTitleFlashIn 0.88s cubic-bezier(0.22, 0.78, 0.24, 1) forwards;
+    }
+
+    .hero-main.cinematic.is-revealed .pill {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.5s;
+    }
+
+    .hero-main.cinematic.is-revealed .hero-lead {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.6s;
+    }
+
+    .hero-main.cinematic.is-revealed .hero-extra {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.72s;
+    }
+
+    @keyframes heroTitleFlashIn {
+      0% {
+        opacity: 0;
+        filter: blur(1.6px);
+        transform: translateY(10px) scale(1.03);
+      }
+      24% {
+        opacity: 1;
+        filter: none;
+        transform: translateY(0) scale(1);
+      }
+      38% {
+        opacity: 0.38;
+      }
+      56% {
+        opacity: 0.92;
+      }
+      100% {
+        opacity: 1;
+        filter: none;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 229, 186, 0.5);
+      padding: 0.38rem 0.75rem;
+      font-size: 0.75rem;
+      color: #fff3dd;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      background: rgba(255, 219, 162, 0.15);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 3.3vw, 3rem);
+      line-height: 1.06;
+      margin-bottom: 0.8rem;
+    }
+
+    .sub {
+      color: var(--text-soft);
+      font-size: clamp(0.98rem, 1.5vw, 1.1rem);
+      line-height: 1.7;
+      max-width: 63ch;
+      margin-bottom: 1.3rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-main .hero-title,
+    .hero-main .sub,
+    .hero-main .author-list,
+    .hero-main .affiliation-list {
+      color: #fff3df;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .author-list {
+      margin: 0;
+      font-size: 1rem;
+      color: #fff3df;
+      line-height: 1.8;
+    }
+
+    .author-list span {
+      white-space: nowrap;
+      margin: 0 0.35rem;
+    }
+
+    .affiliation-list {
+      margin: 0.2rem 0 0;
+      color: #f0dcb8;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .logo-row {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
+
+    .logo-slot {
+      min-height: 66px;
+      border: 1px dashed rgba(255, 224, 175, 0.5);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font: 500 0.8rem/1.45 "Space Grotesk", sans-serif;
+      color: #ffe9c7;
+      background: rgba(44, 31, 18, 0.42);
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.62rem 1rem;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.93rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #e7aa57, #f2c67f);
+      color: #3e2a12;
+      box-shadow: 0 0 0 0 rgba(226, 159, 78, 0.34);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 0 5px rgba(223, 169, 100, 0.2);
+    }
+
+    .btn-ghost {
+      border-color: rgba(139, 114, 76, 0.35);
+      background: rgba(253, 246, 232, 0.8);
+    }
+
+    .hero-main .btn-ghost {
+      border-color: rgba(255, 227, 184, 0.5);
+      background: rgba(255, 243, 218, 0.16);
+      color: #fff3df;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .section-head h2 {
+      font-size: clamp(1.35rem, 2.2vw, 2rem);
+    }
+
+    .section-head p {
+      margin: 0;
+      max-width: 52ch;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      padding: 1.1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      font-size: 1.07rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--text-soft);
+      line-height: 1.66;
+      font-size: 0.93rem;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(164, 188, 231, 0.34);
+      background: #000;
+    }
+
+    .demo-layout {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .main-demo {
+      padding: 0.9rem;
+      background: linear-gradient(145deg, rgba(248, 236, 211, 0.9), rgba(244, 228, 196, 0.84));
+    }
+
+    .demo-head {
+      margin-bottom: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .demo-title {
+      margin: 0;
+      font-size: 1rem;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0.03em;
+    }
+
+    .demo-badge {
+      border: 1px solid rgba(129, 157, 79, 0.45);
+      color: #556c2f;
+      background: rgba(136, 169, 90, 0.15);
+      border-radius: 999px;
+      font: 700 0.72rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.36rem 0.65rem;
+    }
+
+    .demo-meta {
+      margin: 0.65rem 0 0;
+      color: #6f614b;
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    .sub-head {
+      margin-top: 0.45rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+
+    .sub-title {
+      margin: 0;
+      font-size: 1rem;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0.03em;
+    }
+
+    .sub-tagline {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.88rem;
+    }
+
+    .tab-row {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .demo-tab {
+      border: 1px solid rgba(136, 112, 76, 0.32);
+      background: rgba(255, 248, 236, 0.94);
+      color: #5e4b2f;
+      border-radius: 999px;
+      padding: 0.38rem 0.74rem;
+      font: 500 0.78rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .demo-tab:hover {
+      border-color: rgba(205, 153, 79, 0.48);
+      color: #4b371d;
+    }
+
+    .demo-tab.active {
+      border-color: rgba(136, 169, 90, 0.5);
+      background: rgba(136, 169, 90, 0.16);
+      color: #425b1e;
+    }
+
+    .sub-grid {
+      margin-top: 0.8rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .sub-demo {
+      padding: 0.7rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .sub-demo.hidden {
+      display: none;
+    }
+
+    .sub-demo:hover {
+      transform: translateY(-2px);
+      border-color: rgba(205, 153, 79, 0.48);
+    }
+
+    .sub-demo.active {
+      border-color: rgba(136, 169, 90, 0.62);
+      box-shadow: 0 0 0 1px rgba(136, 169, 90, 0.34) inset;
+    }
+
+    .sub-demo h3 {
+      margin: 0.65rem 0 0.2rem;
+      font-size: 0.95rem;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .sub-demo p {
+      margin: 0;
+      color: #6f614b;
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .open-main {
+      margin-top: 0.55rem;
+      border: 1px solid rgba(134, 110, 72, 0.36);
+      background: rgba(255, 248, 233, 0.94);
+      color: #5d492d;
+      border-radius: 999px;
+      padding: 0.38rem 0.72rem;
+      font: 500 0.75rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .gallery-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .media-card {
+      padding: 0.7rem;
+    }
+
+    .media-card h3 {
+      margin: 0.6rem 0 0.2rem;
+      font-size: 0.95rem;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .media-card p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+
+    .more-toggle-wrap {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .more-collapse {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .more-collapse.show {
+      display: block;
+    }
+
+    .ua-wrap {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .ua-switch {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .ua-btn {
+      border: 1px solid rgba(136, 112, 76, 0.32);
+      background: rgba(255, 248, 236, 0.94);
+      color: #5e4b2f;
+      border-radius: 999px;
+      padding: 0.4rem 0.78rem;
+      font: 500 0.78rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .ua-btn.active {
+      border-color: rgba(136, 169, 90, 0.5);
+      background: rgba(136, 169, 90, 0.16);
+      color: #425b1e;
+    }
+
+    .ua-split {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 0.9rem;
+      align-items: stretch;
+    }
+
+    .ua-card {
+      padding: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      height: 100%;
+    }
+
+    .ua-card-figure {
+      align-items: center;
+    }
+
+    .ua-card-figure h3,
+    .ua-card-figure .ua-note {
+      align-self: stretch;
+    }
+
+    .ua-card-figure .ua-note {
+      margin-top: auto;
+    }
+
+    .ua-card h3 {
+      margin: 0.1rem 0 0;
+      font-size: 1rem;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .ua-figure {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid rgba(132, 108, 73, 0.24);
+      background: #fff;
+    }
+
+    .ua-figure-small {
+      width: 100%;
+      height: 100%;
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
+    .ua-note {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .ua-figure-wrap,
+    .ua-video-wrap {
+      border-radius: 12px;
+      border: 1px solid rgba(132, 108, 73, 0.24);
+      overflow: hidden;
+    }
+
+    .ua-figure-wrap {
+      flex: 0 0 auto;
+      width: min(62%, 240px);
+      height: clamp(150px, 18vw, 210px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem;
+      background: #fff;
+    }
+
+    .ua-figure-wrap .ua-figure {
+      border: none;
+    }
+
+    .ua-video-wrap {
+      flex: 0 0 auto;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .ua-video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border: none;
+      border-radius: 0;
+    }
+
+    .method {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 1rem;
+    }
+
+    .method-figure-card {
+      padding: 0.8rem;
+    }
+
+    .method-figure-frame {
+      border: 1px solid rgba(132, 108, 73, 0.24);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .method-figure-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+
+    .diagram {
+      border: 1px dashed rgba(139, 113, 77, 0.45);
+      border-radius: var(--radius);
+      padding: 1rem;
+      min-height: 250px;
+      background: linear-gradient(140deg, rgba(248, 234, 205, 0.92), rgba(242, 225, 191, 0.9));
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #6d5c44;
+      line-height: 1.7;
+    }
+
+    .steps {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.95rem 1rem;
+      background: var(--card);
+    }
+
+    .step span {
+      display: inline-block;
+      color: var(--amber);
+      font: 700 0.76rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--text-soft);
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      overflow: hidden;
+      border-radius: var(--radius);
+    }
+
+    th,
+    td {
+      border: 1px solid rgba(132, 108, 73, 0.24);
+      padding: 0.7rem;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(238, 220, 186, 0.82);
+      color: #49341b;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0.02em;
+      font-weight: 500;
+    }
+
+    td {
+      color: #5f4f38;
+      background: rgba(255, 249, 237, 0.86);
+    }
+
+    .highlight {
+      color: var(--lime);
+      font-weight: 700;
+    }
+
+    .citation-box {
+      border: 1px solid rgba(132, 108, 73, 0.32);
+      border-radius: var(--radius);
+      background: rgba(255, 249, 238, 0.9);
+      padding: 1rem;
+    }
+
+    .citation-box pre {
+      margin: 0;
+      color: #59452a;
+      overflow: auto;
+      white-space: pre;
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .copy {
+      margin-top: 0.75rem;
+    }
+
+    .footer {
+      padding: 1.6rem 0 2rem;
+      color: #7a6546;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(138, 113, 78, 0.22);
+      text-align: center;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (max-width: 960px) {
+      .hero-wrap,
+      .method {
+        grid-template-columns: 1fr;
+      }
+      .hero-main {
+        min-height: 100vh;
+        border-radius: 14px;
+      }
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+      .sub-grid {
+        grid-template-columns: 1fr;
+      }
+      .media-grid,
+      .ua-split {
+        grid-template-columns: 1fr;
+      }
+      .gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .demo-head {
+        align-items: flex-start;
+      }
+      .logo-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-main.cinematic .hero-reveal-mask,
+      .hero-main.cinematic .hero-cutline {
+        display: none;
+      }
+      .hero-main.cinematic .pill,
+      .hero-main.cinematic .hero-title,
+      .hero-main.cinematic .hero-lead {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        animation: none;
+      }
+      .hero-main.cinematic .hero-bg-video,
+      .hero-main.cinematic .hero-video-glow,
+      .hero-main.cinematic .hero-extra {
+        transition: none;
+      }
+      .hero-main.cinematic .hero-bg-video {
+        opacity: 0;
+        filter: none;
+        transform: none;
+      }
+      .hero-main.cinematic .hero-extra {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">OmniXtreme</div>
+      <nav class="nav-links">
+        <a href="#gallery">Behavior Gallery</a>
+        <a href="#method">Method</a>
+        <a href="#ua_ablation">Ablation Study</a>
+        <a href="#citation">Citation</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero reveal">
+      <div class="hero-wrap">
+        <article class="hero-main cinematic">
+          <video class="hero-bg-video" src="assets/hero/zaji.MP4" autoplay muted playsinline preload="metadata" aria-hidden="true"></video>
+          <div class="hero-video-overlay"></div>
+          <div class="hero-video-glow"></div>
+          <div class="hero-reveal-mask"></div>
+          <div class="hero-cutline"></div>
+          <div class="hero-content">
+            <div class="pill">Preprint</div>
+            <h1 class="hero-title">
+              <span class="hero-name">OmniXtreme</span>
+              <span class="hero-subtitle">Breaking the Generality Barrier in High-Dynamic Humanoid Control</span>
+            </h1>
+            <div class="hero-extra">
+              <p class="author-list">
+                <span>Author One<sup>1</sup></span>
+                <span>Author Two<sup>1</sup></span>
+                <span>Author Three<sup>2</sup></span>
+                <span>Author Four<sup>2</sup></span>
+              </p>
+              <p class="affiliation-list">
+                <sup>1</sup> Institute / University A |
+                <sup>2</sup> Institute / University B
+              </p>
+              <div class="logo-row">
+                <div class="logo-slot">Institution Logo 1</div>
+                <div class="logo-slot">Institution Logo 2</div>
+                <div class="logo-slot">Lab Logo 1</div>
+                <div class="logo-slot">Lab Logo 2</div>
+              </div>
+              <div class="actions">
+                <a class="btn btn-primary" href="#" aria-label="Paper Link">[PDF] Paper</a>
+                <a class="btn btn-ghost" href="#" aria-label="Code Link">[<>] Code</a>
+                <a class="btn btn-ghost" href="#gallery">[PLAY] Video</a>
+                <a class="btn btn-ghost" href="#" aria-label="Dataset Link">[DB] Dataset</a>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="gallery" class="container reveal">
+      <div class="section-head">
+        <h2>Behavior Gallery</h2>
+        <p>Unified policy control across diverse extreme behaviors.</p>
+      </div>
+      <div class="media-grid gallery-grid">
+        <article class="card media-card">
+          <video src="assets/gallery_crop/doublekongfan/doublekongfan-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>B-boying with a rapid-fire string of back handsprings.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/easy_zaji/easy_zaji-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Skip back, pivot through a hand-to-headstand, drop, flip, and bounce back.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/jiewu3/jiewu3-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Long breaking dance.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/jiewu4/jiewu4-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Another long breaking dance.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/webster5/webster5-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Five consecutive webster flip.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/yewendun/yewendun-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Alternating pistol squats.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/combo_flip/combo_flip-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Back handspring, cartwheels, aerial cartwheel, bicycle kick flips. </h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/combo_kick/combo_kick-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Spinkicks, butterfly kicks. </h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/combo_crawl/combo_crawl-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Forward roll, backward roll, crawl forward.</h3>
+        </article>
+        <article class="card media-card">
+          <video src="assets/gallery_crop/combo_demo2/combo_demo2-1.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Thomas flare, backspin, crawl forward and backflip.</h3>
+        </article>
+      </div>
+
+      <div class="more-toggle-wrap">
+        <button id="moreToggleBtn" class="btn btn-ghost" type="button" aria-expanded="false">Show More Videos</button>
+      </div>
+
+      <div id="moreCollapse" class="more-collapse">
+        <div class="section-head">
+          <h2>More</h2>
+          <p>Supplementary demos generated by a unified policy.</p>
+        </div>
+        <div class="media-grid">
+          <article class="card media-card">
+            <video src="assets/more/attack/attack-1.mp4" controls muted loop playsinline preload="none"></video>
+            <h3>Attack combos.</h3>
+          </article>
+          <article class="card media-card">
+            <video src="assets/more/daoli/daoli-1.mp4" controls muted loop playsinline preload="none"></video>
+            <h3>Handstand walk.</h3>
+          </article>
+          <article class="card media-card">
+            <video src="assets/more/kick/kick-1.mp4" controls muted loop playsinline preload="none"></video>
+            <h3>Another attack combos.</h3>
+          </article>
+          <article class="card media-card">
+            <video src="assets/more/KO/KO-1.mp4" controls muted loop playsinline preload="none"></video>
+            <h3>Knocked out.</h3>
+          </article>
+          <article class="card media-card">
+            <video src="assets/more/pushup/pushup-1.mp4" controls muted loop playsinline preload="none"></video>
+            <h3>Push-ups.</h3>
+          </article>
+          <article class="card media-card">
+            <video src="assets/more/rollflip/rollflip-1.mp4" controls muted loop playsinline preload="none"></video>
+            <h3>Roll-flip combos.</h3>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="method" class="container reveal">
+      <div class="section-head">
+        <h2>Method</h2>
+      </div>
+      <div class="method">
+        <article class="card method-figure-card">
+          <div class="method-figure-frame">
+            <img class="method-figure-img" src="assets/method/method.png" alt="Method figure">
+          </div>
+        </article>
+        <div class="steps">
+          <article class="step">
+            <span>Pre-training</span>
+            <p>A unified base policy is trained via DAgger-based Flow Matching to aggregate diverse motion priors from different motion tracking experts.</p>
+          </article>
+          <article class="step">
+            <span>Post-training</span>
+            <p>The base policy is frozen while a residual policy is optimized under stringent motor constraints, extensive domain randomization, and power-safety regularization to bridge the sim-to-real gap.</p>
+          </article>
+          <article class="step">
+            <span>Deployment</span>
+            <p>The whole inference pipeline is real- time and executed entirely onboard, facilitating robust and agile control in physical environments.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="ua_ablation" class="container reveal">
+      <div class="section-head">
+        <h2>Ablation Study</h2>
+      </div>
+      <div class="ua-wrap">
+        <div class="ua-switch" role="tablist" aria-label="UA ablation mode">
+          <button class="ua-btn active" type="button" data-mode="ps">Power-safety regularization</button>
+          <button class="ua-btn" type="button" data-mode="mcm">Motor characteristic modeling</button>
+        </div>
+        <div class="ua-split">
+          <article class="card ua-card ua-card-figure">
+            <div class="ua-figure-wrap">
+              <img id="uaFigure" class="ua-figure ua-figure-small" src="assets/ua_ablation/ps.png" alt="UA ablation figure">
+            </div>
+            <p id="uaFigureNote" class="ua-note">Power-Safety Regularization explicitly penalizes excessive negative joint power to prevent unsafe energy absorption and transient braking loads during high-dynamic motions.</p>
+          </article>
+          <article class="card ua-card ua-card-video">
+            <div class="ua-video-wrap">
+              <video id="uaVideo" src="assets/ua_ablation/ps.mp4" controls muted loop playsinline preload="none"></video>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation" class="container reveal">
+      <div class="section-head">
+        <h2>Citation</h2>
+        <p>Use this BibTeX entry for reference.</p>
+      </div>
+      <article class="citation-box">
+        <pre id="bibtex">@inproceedings{omnixtreme2026,
+  title={OmniXtreme: Breaking the Generality Barrier in High-Dynamic Humanoid Control},
+  author={Author One and Author Two and Author Three and Author Four},
+  booktitle={Conference Name},
+  year={2026},
+  url={https://your-project-page.example.com}
+}</pre>
+        <button id="copyBib" class="btn btn-ghost copy" type="button">Copy BibTeX</button>
+      </article>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    Humanoid Whole-Body Control Demo Page. Replace placeholder links and media before release.
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+
+    const cinematicHero = document.querySelector(".hero-main.cinematic");
+    if (cinematicHero) {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const heroIntroVideo = cinematicHero.querySelector(".hero-bg-video");
+      const revealHero = () => {
+        if (!cinematicHero.classList.contains("is-revealed")) {
+          cinematicHero.classList.add("is-revealed");
+        }
+      };
+
+      if (reduceMotion || !heroIntroVideo) {
+        revealHero();
+      } else {
+        const fallbackTimer = window.setTimeout(revealHero, 8000);
+        const revealAndClear = () => {
+          window.clearTimeout(fallbackTimer);
+          revealHero();
+        };
+
+        heroIntroVideo.addEventListener("ended", revealAndClear, { once: true });
+        heroIntroVideo.addEventListener("error", revealAndClear, { once: true });
+      }
+    }
+
+    const tryPlayVideo = (videoEl) => {
+      if (!videoEl) return;
+      const playPromise = videoEl.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    };
+
+    const managedVideos = Array.from(document.querySelectorAll("main video:not(.hero-bg-video)"));
+    managedVideos.forEach((videoEl) => {
+      videoEl.muted = true;
+      videoEl.loop = true;
+      videoEl.playsInline = true;
+      if (!videoEl.getAttribute("preload") || videoEl.getAttribute("preload") === "none") {
+        videoEl.setAttribute("preload", "metadata");
+      }
+    });
+
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const videoEl = entry.target;
+        if (entry.isIntersecting) {
+          if (videoEl.preload !== "auto") {
+            videoEl.preload = "auto";
+            if (videoEl.readyState < 2) videoEl.load();
+          }
+          tryPlayVideo(videoEl);
+        } else if (!videoEl.paused) {
+          videoEl.pause();
+        }
+      });
+    }, { threshold: 0.45, rootMargin: "140px 0px" });
+
+    managedVideos.forEach((videoEl) => videoObserver.observe(videoEl));
+
+    const uaModes = {
+      ps: {
+        label: "Power-safety regularization",
+        figure: "assets/ua_ablation/ps.png",
+        video: "assets/ua_ablation/ps.mp4",
+        figureNote: "Power-Safety Regularization explicitly penalizes excessive negative joint power to prevent unsafe energy absorption and transient braking loads during high-dynamic motions.",
+      },
+      mcm: {
+        label: "Motor characteristic modeling",
+        figure: "assets/ua_ablation/mcm.png",
+        video: "assets/ua_ablation/mcm.mp4",
+        figureNote: "Motor characteristic modeling integrates realistic torque-speed envelopes and actuator nonlinearities into training to align simulation with real hardware constraints.",
+      },
+    };
+
+    const uaFigure = document.getElementById("uaFigure");
+    const uaVideo = document.getElementById("uaVideo");
+    const uaFigureNote = document.getElementById("uaFigureNote");
+    const uaButtons = document.querySelectorAll(".ua-btn");
+
+    const setUaMode = (mode) => {
+      const cfg = uaModes[mode];
+      if (!cfg || !uaFigure || !uaVideo) return;
+
+      uaFigure.src = cfg.figure;
+      uaVideo.src = cfg.video;
+      uaVideo.load();
+      tryPlayVideo(uaVideo);
+      if (uaFigureNote) uaFigureNote.textContent = cfg.figureNote || "";
+      uaButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.mode === mode));
+    };
+
+    uaButtons.forEach((btn) => {
+      btn.addEventListener("click", () => setUaMode(btn.dataset.mode));
+    });
+
+    setUaMode("ps");
+
+    const moreToggleBtn = document.getElementById("moreToggleBtn");
+    const moreCollapse = document.getElementById("moreCollapse");
+    if (moreToggleBtn && moreCollapse) {
+      moreToggleBtn.addEventListener("click", () => {
+        const expanded = moreCollapse.classList.toggle("show");
+        moreToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+        moreToggleBtn.textContent = expanded ? "Hide More Videos" : "Show More Videos";
+        if (expanded) {
+          moreCollapse.querySelectorAll("video").forEach((videoEl) => {
+            videoEl.preload = "auto";
+            if (videoEl.readyState < 2) videoEl.load();
+            tryPlayVideo(videoEl);
+          });
+        }
+      });
+    }
+
+    const copyBib = document.getElementById("copyBib");
+    if (copyBib) {
+      copyBib.addEventListener("click", async () => {
+        const text = document.getElementById("bibtex")?.innerText || "";
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (err) {
+          const area = document.createElement("textarea");
+          area.value = text;
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand("copy");
+          area.remove();
+        }
+        copyBib.textContent = "Copied";
+        setTimeout(() => { copyBib.textContent = "Copy BibTeX"; }, 1200);
+      });
+    }
+  </script>
+</body>
+</html>
