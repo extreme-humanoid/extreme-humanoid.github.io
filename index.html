@@ -1235,14 +1235,30 @@
       if (reduceMotion || !heroIntroVideo) {
         revealHero();
       } else {
-        const fallbackTimer = window.setTimeout(revealHero, 8000);
+        const revealLeadSeconds = 0.3;
+        let fallbackTimer = 0;
+        const revealNearEnd = () => {
+          const duration = heroIntroVideo.duration;
+          if (!Number.isFinite(duration) || duration <= 0) return;
+          if (duration - heroIntroVideo.currentTime <= revealLeadSeconds) {
+            revealAndClear();
+          }
+        };
+        const cleanupRevealListeners = () => {
+          heroIntroVideo.removeEventListener("timeupdate", revealNearEnd);
+          heroIntroVideo.removeEventListener("ended", revealAndClear);
+          heroIntroVideo.removeEventListener("error", revealAndClear);
+        };
         const revealAndClear = () => {
           window.clearTimeout(fallbackTimer);
+          cleanupRevealListeners();
           revealHero();
         };
+        fallbackTimer = window.setTimeout(revealAndClear, 8000);
 
-        heroIntroVideo.addEventListener("ended", revealAndClear, { once: true });
-        heroIntroVideo.addEventListener("error", revealAndClear, { once: true });
+        heroIntroVideo.addEventListener("timeupdate", revealNearEnd);
+        heroIntroVideo.addEventListener("ended", revealAndClear);
+        heroIntroVideo.addEventListener("error", revealAndClear);
       }
     }
 
