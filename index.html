@@ -640,6 +640,21 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .gallery-main-demo {
+      margin-bottom: 1rem;
+    }
+
+    .main-demo-card {
+      padding: 0.8rem;
+    }
+
+    .main-demo-card video {
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      background: #000;
+      border-radius: 12px;
+    }
+
     .media-card {
       padding: 0.7rem;
     }
@@ -1054,6 +1069,12 @@
       <div class="section-head">
         <h2>Behavior Gallery</h2>
         <p>Unified policy control across diverse extreme behaviors.</p>
+      </div>
+      <div class="gallery-main-demo">
+        <article class="card media-card main-demo-card">
+          <video src="assets/main_demo_full.mp4" controls muted loop playsinline preload="none"></video>
+          <h3>Behavior Montage</h3>
+        </article>
       </div>
       <div class="media-grid gallery-grid">
         <article class="card media-card">
