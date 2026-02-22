@@ -1264,16 +1264,22 @@
         revealHero();
       } else {
         const revealLeadSeconds = 0.6;
+        const loopTrimSeconds = 0.4;
         let fallbackTimer = 0;
-        const revealNearEnd = () => {
+        const handleHeroTimeUpdate = () => {
           const duration = heroIntroVideo.duration;
           if (!Number.isFinite(duration) || duration <= 0) return;
-          if (duration - heroIntroVideo.currentTime <= revealLeadSeconds) {
+
+          const remaining = duration - heroIntroVideo.currentTime;
+          if (!cinematicHero.classList.contains("is-revealed") && remaining <= revealLeadSeconds) {
             revealAndClear();
+          }
+
+          if (!heroIntroVideo.paused && remaining <= loopTrimSeconds) {
+            heroIntroVideo.currentTime = 0.02;
           }
         };
         const cleanupRevealListeners = () => {
-          heroIntroVideo.removeEventListener("timeupdate", revealNearEnd);
           heroIntroVideo.removeEventListener("ended", revealAndClear);
           heroIntroVideo.removeEventListener("error", revealAndClear);
         };
@@ -1284,7 +1290,7 @@
         };
         fallbackTimer = window.setTimeout(revealAndClear, 8000);
 
-        heroIntroVideo.addEventListener("timeupdate", revealNearEnd);
+        heroIntroVideo.addEventListener("timeupdate", handleHeroTimeUpdate);
         heroIntroVideo.addEventListener("ended", revealAndClear);
         heroIntroVideo.addEventListener("error", revealAndClear);
       }
