@@ -366,6 +366,18 @@
       margin: 0 0.35rem;
     }
 
+    .author-link {
+      color: #fff3df;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .author-link:hover {
+      color: #ffffff;
+      border-color: rgba(255, 243, 223, 0.8);
+    }
+
     .affiliation-list {
       margin: 0.2rem 0 0;
       color: #f0dcb8;
@@ -373,23 +385,11 @@
       line-height: 1.7;
     }
 
-    .logo-row {
-      margin-top: 1rem;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.65rem;
-    }
-
-    .logo-slot {
-      min-height: 66px;
-      border: 1px dashed rgba(255, 224, 175, 0.5);
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      font: 500 0.8rem/1.45 "Space Grotesk", sans-serif;
-      color: #ffe9c7;
-      background: rgba(44, 31, 18, 0.42);
+    .affiliation-note {
+      display: inline-block;
+      margin-top: 0.28rem;
+      color: #f7e9cc;
+      font-size: 0.84rem;
     }
 
     .btn {
@@ -400,7 +400,41 @@
       color: var(--text);
       text-decoration: none;
       font-size: 0.93rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.44rem;
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-icon {
+      width: 0.95rem;
+      height: 0.95rem;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
+    .btn-icon svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn-label {
+      line-height: 1;
+    }
+
+    .arxiv-mark {
+      font: 700 0.64rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.02em;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      padding: 0.13rem 0.24rem;
+      transform: translateY(-0.02rem);
     }
 
     .btn:hover {
@@ -972,9 +1006,6 @@
       .demo-head {
         align-items: flex-start;
       }
-      .logo-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1039,26 +1070,50 @@
             </h1>
             <div class="hero-extra">
               <p class="author-list">
-                <span>Author One<sup>1</sup></span>
-                <span>Author Two<sup>1</sup></span>
-                <span>Author Three<sup>2</sup></span>
-                <span>Author Four<sup>2</sup></span>
+                <span><a class="author-link" href="https://perkins729.github.io/" target="_blank" rel="noopener noreferrer">Yunshen Wang</a><sup>1,2,3,*</sup></span>
+                <span><a class="author-link" href="https://shzl233.github.io" target="_blank" rel="noopener noreferrer">Shaohang Zhu</a><sup>1,2,4,*</sup></span>
+                <span>Peiyuan Zhi<sup>1,2</sup></span>
+                <span>Yuhan Li<sup>1,2,6</sup></span>
+                <span><a class="author-link" href="https://gauleejx.github.io/" target="_blank" rel="noopener noreferrer">Jiaxin Li</a><sup>1,2,7</sup></span>
+                <span><a class="author-link" href="https://dirtyharrylyl.github.io/" target="_blank" rel="noopener noreferrer">Yong-Lu Li</a><sup>3</sup></span>
+                <span>Yuchen Xiao<sup>5</sup></span>
+                <span>Xingxing Wang<sup>5</sup></span>
+                <span><a class="author-link" href="https://buzz-beater.github.io/" target="_blank" rel="noopener noreferrer">Baoxiong Jia</a><sup>1,2,†</sup></span>
+                <span><a class="author-link" href="https://siyuanhuang.com/" target="_blank" rel="noopener noreferrer">Siyuan Huang</a><sup>1,2,†</sup></span>
               </p>
               <p class="affiliation-list">
-                <sup>1</sup> Institute / University A |
-                <sup>2</sup> Institute / University B
+                <sup>1</sup> State Key Laboratory of General Artificial Intelligence, Beijing Institute for General Artificial Intelligence (BIGAI)<br>
+                <sup>2</sup> Joint Laboratory of Embodied AI and Humanoid Robots, BIGAI &amp; UniTree Robotics<br>
+                <sup>3</sup> Shanghai Jiao Tong University<br>
+                <sup>4</sup> University of Science and Technology of China<br>
+                <sup>5</sup> Untree Robotics<br>
+                <sup>6</sup> Huazhong University of Science and Technology<br>
+                <sup>7</sup> Beijing Institute of Technology<br>
+                <span class="affiliation-note"><sup>*</sup> Equal contribution. <sup>†</sup> Corresponding authors.</span>
               </p>
-              <div class="logo-row">
-                <div class="logo-slot">Institution Logo 1</div>
-                <div class="logo-slot">Institution Logo 2</div>
-                <div class="logo-slot">Lab Logo 1</div>
-                <div class="logo-slot">Lab Logo 2</div>
-              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="#" aria-label="Paper Link">[PDF] Paper</a>
-                <a class="btn btn-ghost" href="#" aria-label="Code Link">[<>] Code</a>
-                <a class="btn btn-ghost" href="#montage">[PLAY] Video</a>
-                <a class="btn btn-ghost" href="#" aria-label="Dataset Link">[DB] Dataset</a>
+                <a class="btn btn-primary" href="#" aria-label="Paper Incoming">
+                  <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" fill="none"></path><path d="M14 3.5V9h5"></path></svg>
+                  </span>
+                  <span class="btn-label">Paper (Incoming)</span>
+                </a>
+                <a class="btn btn-ghost" href="#" aria-label="ArXiv Incoming">
+                  <span class="arxiv-mark" aria-hidden="true">arXiv</span>
+                  <span class="btn-label">ArXiv (Incoming)</span>
+                </a>
+                <a class="btn btn-ghost" href="#" aria-label="Code Incoming">
+                  <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.58.82-2.14-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.5 7.5 0 0 1 8 4.73c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.14 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.14.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z" stroke="none"></path></svg>
+                  </span>
+                  <span class="btn-label">Code (Incoming)</span>
+                </a>
+                <a class="btn btn-ghost" href="#" aria-label="Video Incoming">
+                  <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none"></circle><path d="M10 8.8v6.4l5.5-3.2Z" stroke="none"></path></svg>
+                  </span>
+                  <span class="btn-label">Video (Incoming)</span>
+                </a>
               </div>
             </div>
           </div>
@@ -1224,7 +1279,7 @@
       <article class="citation-box">
         <pre id="bibtex">@inproceedings{omnixtreme2026,
   title={OmniXtreme: Breaking the Generality Barrier in High-Dynamic Humanoid Control},
-  author={Author One and Author Two and Author Three and Author Four},
+  author={Yunshen Wang and Shaohang Zhu and Peiyuan Zhi and Yuhan Li and Jiaxin Li and Yong-Lu Li and Yuchen Xiao and Xingxing Wang and Baoxiong Jia and Siyuan Huang},
   booktitle={Conference Name},
   year={2026},
   url={https://your-project-page.example.com}
